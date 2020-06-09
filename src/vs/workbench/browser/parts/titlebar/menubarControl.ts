@@ -74,7 +74,8 @@ export abstract class MenubarControl extends Disposable {
 
 	protected menuUpdater: RunOnceScheduler;
 
-	protected static readonly MAX_MENU_RECENT_ENTRIES = 10;
+ 	protected static readonly DEFAULT_MAX_MENU_RECENT_PROJECT_ENTRIES = 10;
+ 	protected static readonly DEFAULT_MAX_MENU_RECENT_FILE_ENTRIES = 10;
 
 	constructor(
 		protected readonly menuService: IMenuService,
@@ -146,6 +147,14 @@ export abstract class MenubarControl extends Disposable {
 		return label;
 	}
 
+	private get currentMaxRecentProjectEntriesSetting(): number {
+		return this.configurationService.getValue<number>('window.maxRecentProjectEntries') || MenubarControl.DEFAULT_MAX_MENU_RECENT_PROJECT_ENTRIES;
+	}
+
+	private get currentMaxRecentFileEntriesSetting(): number {
+		return this.configurationService.getValue<number>('window.maxRecentFileEntries') || MenubarControl.DEFAULT_MAX_MENU_RECENT_FILE_ENTRIES;
+	}
+
 	protected getOpenRecentActions(): (Separator | IAction & { uri: URI })[] {
 		if (!this.recentlyOpened) {
 			return [];
@@ -156,7 +165,7 @@ export abstract class MenubarControl extends Disposable {
 		const result = [];
 
 		if (workspaces.length > 0) {
-			for (let i = 0; i < MenubarControl.MAX_MENU_RECENT_ENTRIES && i < workspaces.length; i++) {
+			for (let i = 0; i < this.currentMaxRecentProjectEntriesSetting && i < workspaces.length; i++) {
 				result.push(this.createOpenRecentMenuAction(workspaces[i]));
 			}
 
@@ -164,7 +173,7 @@ export abstract class MenubarControl extends Disposable {
 		}
 
 		if (files.length > 0) {
-			for (let i = 0; i < MenubarControl.MAX_MENU_RECENT_ENTRIES && i < files.length; i++) {
+			for (let i = 0; i < this.currentMaxRecentFileEntriesSetting && i < files.length; i++) {
 				result.push(this.createOpenRecentMenuAction(files[i]));
 			}
 
